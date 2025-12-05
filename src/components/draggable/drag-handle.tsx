@@ -10,7 +10,7 @@ export function DragHandle({
     <button
       ref={ref}
       className={twMerge(
-        'drag-handle cursor-grab active:cursor-grabbing text-slate-500 bg-transparent p-1transition-colors',
+        'drag-handle cursor-grab active:cursor-grabbing text-slate-500 bg-transparent transition-colors',
         className
       )}
     >

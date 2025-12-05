@@ -1,6 +1,9 @@
 export interface File {
   id: string;
   filename: string;
+  type: string;
+  category: string;
+  size: number;
 }
 
 export interface Document {

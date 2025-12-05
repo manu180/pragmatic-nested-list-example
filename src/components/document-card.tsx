@@ -1,28 +1,24 @@
-import { useRef, useEffect, useState } from 'react';
-import type { Document } from '../types/data';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
+import { useRef, useEffect, useState } from "react";
+import type { Document } from "../types/data";
+import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import {
   draggable,
   dropTargetForElements,
   type ElementDropTargetEventBasePayload,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { DragHandle } from './draggable/drag-handle';
-import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
-import {
-  isDocumentElement,
-  type DocumentElement,
-  type DraggableState,
-} from '../types/draggable';
-import { twMerge } from 'tailwind-merge';
-import { createPortal } from 'react-dom';
-import { DragPreview } from './draggable/drag-preview';
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { DragHandle } from "./draggable/drag-handle";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
+import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
+import { isDocumentElement, type DocumentElement, type DraggableState } from "../types/draggable";
+import { twMerge } from "tailwind-merge";
+import { createPortal } from "react-dom";
+import { DragPreview } from "./draggable/drag-preview";
 import {
   type Instruction,
   attachInstruction,
   extractInstruction,
-} from '@atlaskit/pragmatic-drag-and-drop-hitbox/list-item';
-import { DropIndicator } from './draggable/drop-indicator';
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
+import { DropIndicator } from "./draggable/drop-indicator";
 
 interface DocumentCardProps {
   groupId: string;
@@ -31,35 +27,30 @@ interface DocumentCardProps {
   document: Document;
 }
 
-const DocumentCard: React.FC<DocumentCardProps> = ({
-  document,
-  groupId,
-  isFirst,
-  isLast,
-}) => {
+const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst, isLast }) => {
   const ref = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const [state, setState] = useState<DraggableState>({
-    type: 'idle',
+    type: "idle",
   });
   const [instruction, setInstruction] = useState<Instruction | null>(null);
+  const moveInBetween =
+    instruction &&
+    !(isFirst && instruction.operation == "reorder-before") &&
+    !(isLast && instruction.operation == "reorder-after");
 
   useEffect(() => {
     if (!ref.current || !dragHandleRef.current) return;
     const element = ref.current;
     const dragHandle = dragHandleRef.current;
     const data: DocumentElement = {
-      type: 'document',
+      type: "document",
       groupId,
       id: document.id,
       isFirst,
       isLast,
     };
-    function onChange({
-      source,
-      self,
-      location,
-    }: ElementDropTargetEventBasePayload) {
+    function onChange({ source, self, location }: ElementDropTargetEventBasePayload) {
       if (!isDocumentElement(source.data) || !isDocumentElement(self.data)) {
         return;
       }
@@ -82,20 +73,20 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
           setCustomNativeDragPreview({
             nativeSetDragImage,
             getOffset: pointerOutsideOfPreview({
-              x: '16px',
-              y: '8px',
+              x: "16px",
+              y: "8px",
             }),
             render({ container }) {
-              setState({ type: 'preview', container });
-              return () => setState({ type: 'is-dragging' });
+              setState({ type: "preview", container });
+              return () => setState({ type: "is-dragging" });
             },
           });
         },
         onDragStart() {
-          setState({ type: 'is-dragging' });
+          setState({ type: "is-dragging" });
         },
         onDrop() {
-          setState({ type: 'idle' });
+          setState({ type: "idle" });
         },
       }),
       dropTargetForElements({
@@ -110,9 +101,9 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
             element,
             input,
             operations: {
-              'reorder-before': 'available',
-              'reorder-after': 'available',
-              combine: 'not-available',
+              "reorder-before": "available",
+              "reorder-after": "available",
+              combine: "not-available",
             },
           });
         },
@@ -130,46 +121,41 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
 
   return (
     <>
-      <div className="relative">
+      <div
+        ref={ref}
+        className={twMerge(
+          "relative col-span-full grid grid-cols-subgrid",
+          state.type === "is-dragging" && "opacity-40"
+        )}
+      >
         <div
-          ref={ref}
-          className={twMerge(
-            'flex flex-col gap-2 bg-white rounded-md p-1.5 shadow/10',
-            state.type === 'is-dragging' && 'bg-slate-100 opacity-40'
-          )}
+          className="peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4"
         >
-          <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
-            <DragHandle
-              ref={dragHandleRef}
-              className="hover:bg-slate-200 hover:text-slate-700 rounded px-0.5 py-1"
-            />
-            <h2 className="text-sm font-medium text-slate-700">
-              {document.name}
-            </h2>
-            {document.files.length > 0 && (
-              <div className="col-start-2 grid gap-1">
-                {document.files.map((file) => (
-                  <div
-                    key={file.id}
-                    className="bg-gray-50 px-3 py-1.5 rounded text-sm text-gray-600"
-                  >
-                    <span className="font-mono">{file.filename}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {document.name}
         </div>
+        <DragHandle
+          ref={dragHandleRef}
+          className="absolute -left-3 top-1 invisible peer-hover:visible hover:visible hover:bg-teal-500 text-white hover:text-white p-1 rounded shadow bg-teal-400/70"
+        />
+        {document.files.length > 0 && (
+          <div className="grid grid-cols-subgrid col-start-2 col-span-full border-t-slate-200 border-t">
+            {document.files.map((file) => (
+              <div key={file.id} className="grid grid-cols-subgrid col-span-full border-slate-100 border-b py-1.5 text-sm text-gray-600">
+                <div className="pl-2">{file.filename}</div>
+                <div className="pl-2">{file.type}</div>
+                <div className="pl-2">{file.category}</div>
+                <div className="pl-2">{file.size}</div>
+              </div>
+            ))}
+          </div>
+        )}
         {instruction && (
-          <DropIndicator instruction={instruction} lineGap="8px" />
+          <DropIndicator instruction={instruction} color="emerald" lineGap={moveInBetween ? "6px" : undefined} />
         )}
       </div>
-      {state.type === 'preview' &&
+      {state.type === "preview" &&
         createPortal(
-          <DragPreview
-            className="bg-slate-400 text-white text-sm"
-            value={`${document.name}`}
-          />,
+          <DragPreview className="bg-teal-500 text-white text-sm" value={`${document.name}`} />,
           state.container
         )}
     </>
