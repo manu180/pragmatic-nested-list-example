@@ -13,8 +13,9 @@ export function DragHandle({
         'drag-handle cursor-grab active:cursor-grabbing text-slate-500 bg-transparent transition-colors',
         className
       )}
+      type="button"
     >
-      <GripVertical size={17} />
+      <GripVertical size={15} />
     </button>
   );
 }

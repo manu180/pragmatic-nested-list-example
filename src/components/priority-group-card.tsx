@@ -163,19 +163,19 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
         className={twMerge(
           "relative col-span-full grid grid-cols-subgrid",
           draggableState.type === "is-dragging" && " opacity-40",
-          droppableState.isOver && "ring-2 ring-offset-4 rounded ring-blue-700/70"
+          droppableState.isOver && "ring-2 ring-offset-4 rounded-xs ring-blue-700/70"
         )}
       >
         <div
           className={twMerge(
-            "peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 rounded-l-sm border-l-4"
+            "peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
           )}
         >
           {value}
         </div>
         <DragHandle
           ref={dragHandleRef}
-          className="absolute -left-3 top-1 invisible peer-hover:visible hover:visible hover:bg-blue-500 text-white hover:text-white p-1 rounded shadow bg-blue-500/70"
+          className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-blue-500 text-white hover:text-white rounded shadow bg-blue-500/70"
         />
         {group.documents.length > 0 && (
           <div ref={containerRef} className="ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full  gap-y-1.5">

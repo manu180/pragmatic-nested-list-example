@@ -135,16 +135,16 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         </div>
         <DragHandle
           ref={dragHandleRef}
-          className="absolute -left-3 top-1 invisible peer-hover:visible hover:visible hover:bg-teal-500 text-white hover:text-white p-1 rounded shadow bg-teal-400/70"
+          className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-teal-500 text-white hover:text-white rounded shadow bg-teal-400/70"
         />
         {document.files.length > 0 && (
           <div className="grid grid-cols-subgrid col-start-2 col-span-full border-t-slate-200 border-t">
             {document.files.map((file) => (
               <div key={file.id} className="grid grid-cols-subgrid col-span-full border-slate-100 border-b py-1.5 text-sm text-gray-600">
-                <div className="pl-2">{file.filename}</div>
-                <div className="pl-2">{file.type}</div>
-                <div className="pl-2">{file.category}</div>
-                <div className="pl-2">{file.size}</div>
+                <div className="px-2">{file.filename}</div>
+                <div className="px-2">{file.type}</div>
+                <div className="px-2">{file.category}</div>
+                <div className="px-2">{file.size}</div>
               </div>
             ))}
           </div>

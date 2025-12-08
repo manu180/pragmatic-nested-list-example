@@ -49,11 +49,11 @@ export default function List({ items }: { items: Group[] }) {
   return (
     <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
       <div className="col-span-full grid grid-cols-subgrid text-gray-500 font-medium">
-        <div className="py-2 pl-2">Priority</div>
-        <div className="py-2 pl-2 ml-1.5">Document</div>
-        <div className="py-2 pl-2">File</div>
-        <div className="py-2 pl-2">Type</div>
-        <div className="py-2 pl-2">Category</div>
+        <div className="py-2 px-3">Priority</div>
+        <div className="py-2 px-3 ml-1.5">Document</div>
+        <div className="p-2">File</div>
+        <div className="p-2">Type</div>
+        <div className="p-2">Category</div>
         <div className="p-2">Size</div>
       </div>
       <div className="grid grid-cols-subgrid col-span-full gap-y-1.5">

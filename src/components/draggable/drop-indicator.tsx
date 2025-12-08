@@ -100,7 +100,7 @@ export function DropIndicator({
       }
       className={twMerge(
         `absolute z-10 pointer-events-none box-border ${colorVariants[color].bg}`,
-        `${colorVariants[color].beforeBorder} before:content-[''] before:w-(--terminal-size) before:h-(--terminal-size) before:absolute before:border-(length:--line-thickness) before:border-solid before:rounded-full`, // terminal styles
+        `${colorVariants[color].beforeBorder} before:content-[''] before:w-(--terminal-size) before:bg-white before:h-(--terminal-size) before:absolute before:border-(length:--line-thickness) before:border-solid before:rounded-full`, // terminal styles
         instruction.blocked && "bg-amber-400 before:border-amber-400",
         // (side === "top" || side === "bottom") && "h-(--line-thickness) left-(--terminal-radius) right-0 before:left-(--negative-terminal-size)",
         // (side === "left" || side === "right") && "w-(--line-thickness) top-(--terminal-radius) bottom-0 before:top-(--negative-terminal-size)",
