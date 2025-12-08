@@ -3,6 +3,7 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
 import { isDocumentElement, isGroupElement, type DocumentElement } from "../types/draggable";
 import { reorderWithInstruction, type ReorderInstruction } from "../util/draggable-util";
+import { ListOrdered } from 'lucide-react';
 import PriorityGroupCard from "./priority-group-card";
 import type { Group } from "../types/data";
 import { createGroup } from "../data/data";
@@ -49,7 +50,7 @@ export default function List({ items }: { items: Group[] }) {
   return (
     <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
       <div className="col-span-full grid grid-cols-subgrid text-gray-500 font-medium">
-        <div className="py-2 px-3">Priority</div>
+        <div className="flex items-center gap-2 py-2 px-3"><ListOrdered size={20} /><span>Priority</span></div>
         <div className="py-2 px-3 ml-1.5">Document</div>
         <div className="p-2">File</div>
         <div className="p-2">Type</div>

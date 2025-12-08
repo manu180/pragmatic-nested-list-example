@@ -11,6 +11,7 @@ import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/el
 import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
 import { DropIndicator } from "./draggable/drop-indicator";
 import DocumentCard from "./document-card";
+import { Hash } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import {
   type Instruction,
@@ -168,10 +169,13 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
       >
         <div
           className={twMerge(
-            "peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
+            "peer gap-2 text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
           )}
         >
-          {value}
+          <div className="flex items-center gap-1">
+            <Hash className="text-blue-400 shadow bg-white p-0.5 rounded-full" size={18} />
+            <span>{value}</span>
+          </div>
         </div>
         <DragHandle
           ref={dragHandleRef}
