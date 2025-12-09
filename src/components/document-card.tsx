@@ -128,10 +128,11 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
           state.type === "is-dragging" && "opacity-40"
         )}
       >
-        <div
-          className="peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4"
-        >
-          {document.name}
+        <div className="peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4">
+          <div className="flex gap-3 items-center justify-between">
+            <span className="whitespace-nowrap">{document.name}</span>
+            <span className="rounded-sm px-1.5 py-0.5 bg-slate-400/50 text-xs text-white font-medium">{document.files?.length}</span>
+          </div>
         </div>
         <DragHandle
           ref={dragHandleRef}
@@ -140,7 +141,10 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         {document.files.length > 0 && (
           <div className="grid grid-cols-subgrid col-start-2 col-span-full border-t-slate-200 border-t">
             {document.files.map((file) => (
-              <div key={file.id} className="grid grid-cols-subgrid col-span-full border-slate-100 border-b py-1.5 text-sm text-gray-600">
+              <div
+                key={file.id}
+                className="grid grid-cols-subgrid col-span-full items-center border-slate-100 border-b py-1.5 text-sm text-gray-600"
+              >
                 <div className="px-2">{file.filename}</div>
                 <div className="px-2">{file.type}</div>
                 <div className="px-2">{file.category}</div>

@@ -5,7 +5,7 @@ import List from "./components/list";
 function App() {
   const items: Group[] = getData();
   return (
-    <div className="bg-white min-h-screen min-w-screen p-10">
+    <div className="p-8">
       <List items={items} />
     </div>
   );

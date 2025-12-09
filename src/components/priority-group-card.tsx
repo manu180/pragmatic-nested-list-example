@@ -169,11 +169,11 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
       >
         <div
           className={twMerge(
-            "peer gap-2 text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
+            "peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
           )}
         >
-          <div className="flex items-center gap-1">
-            <Hash className="text-blue-400 shadow bg-white p-0.5 rounded-full" size={18} />
+          <div className="flex items-center ">
+            <Hash className="text-blue-700 p-0.5 rounded-full" size={18} />
             <span>{value}</span>
           </div>
         </div>
