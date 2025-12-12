@@ -28,7 +28,7 @@ export type GroupElement = ElementId &
 
 export type DocumentElement = ElementId &
   ElementPosition & {
-    groupId: string;
+    groupId: GroupElement["id"];
     type: "document";
   };
 

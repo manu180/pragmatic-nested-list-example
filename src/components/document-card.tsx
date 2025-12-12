@@ -19,6 +19,7 @@ import {
   extractInstruction,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
 import { DropIndicator } from "./draggable/drop-indicator";
+import { useDragRegistryContext } from "./draggable/drag-registry-context";
 
 interface DocumentCardProps {
   groupId: string;
@@ -38,7 +39,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
     instruction &&
     !(isFirst && instruction.operation == "reorder-before") &&
     !(isLast && instruction.operation == "reorder-after");
-
+  const { registerElement } = useDragRegistryContext();
   useEffect(() => {
     if (!ref.current || !dragHandleRef.current) return;
     const element = ref.current;
@@ -50,6 +51,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
       isFirst,
       isLast,
     };
+    registerElement({ id: document.id, type: "document" }, element);
     function onChange({ source, self, location }: ElementDropTargetEventBasePayload) {
       if (!isDocumentElement(source.data) || !isDocumentElement(self.data)) {
         return;
@@ -117,7 +119,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         },
       })
     );
-  }, [groupId, isFirst, isLast, document.id]);
+  }, [groupId, isFirst, isLast, document.id, registerElement]);
 
   return (
     <>
@@ -131,7 +133,9 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         <div className="peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4">
           <div className="flex gap-3 items-center justify-between">
             <span className="whitespace-nowrap">{document.name}</span>
-            <span className="rounded-sm px-1.5 py-0.5 bg-slate-400/50 text-xs text-white font-medium">{document.files?.length}</span>
+            <span className="rounded-sm px-1.5 py-0.5 bg-slate-400/50 text-xs text-white font-medium">
+              {document.files?.length}
+            </span>
           </div>
         </div>
         <DragHandle

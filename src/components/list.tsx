@@ -1,16 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
-import { isDocumentElement, isGroupElement, type DocumentElement } from "../types/draggable";
+import { isDocumentElement, isGroupElement, type DocumentElement, type GroupElement } from "../types/draggable";
 import { reorderWithInstruction, type ReorderInstruction } from "../util/draggable-util";
-import { ListOrdered } from 'lucide-react';
+import { ListOrdered } from "lucide-react";
 import PriorityGroupCard from "./priority-group-card";
 import type { Group } from "../types/data";
 import { createGroup } from "../data/data";
+import { createRegistry, triggerPostMoveFlash } from "./draggable/drag-registry";
+import { DragRegistryContext } from "./draggable/drag-registry-context";
+
+type ListState = {
+  groups: Group[];
+  lastMovedElement: GroupElement | DocumentElement | null;
+};
 
 export default function List({ items }: { items: Group[] }) {
-  const [groups, setGroups] = useState<Group[]>(items);
-
+  const [state, setState] = useState<ListState>({
+    groups: items,
+    lastMovedElement: null,
+  });
+  const [registry] = useState(createRegistry);
+  useEffect(() => {
+    if (!state.lastMovedElement) return;
+    const elem = registry.retrieveElement({ id: state.lastMovedElement.id, type: state.lastMovedElement.type });
+    if (!elem) return;
+    triggerPostMoveFlash(elem, "div.peer");
+  });
   useEffect(() => {
     return monitorForElements({
       onDrop({ source, location }) {
@@ -24,45 +40,67 @@ export default function List({ items }: { items: Group[] }) {
         }
         // group over group (reorder)
         if (isGroupElement(sourceElem) && isGroupElement(targetElem)) {
-          setGroups(
-            reorderGroups(groups, sourceElem.id, targetElem.id, instruction).filter((g) => g.documents.length > 0)
-          );
+          setState({
+            groups: reorderGroups(state.groups, sourceElem.id, targetElem.id, instruction).filter(
+              (g) => g.documents.length > 0
+            ),
+            lastMovedElement: sourceElem,
+          });
           return;
         }
         // document over document (reorder)
         if (isDocumentElement(sourceElem) && isDocumentElement(targetElem)) {
-          setGroups(
-            reorderDocuments(groups, sourceElem, targetElem, instruction).filter((g) => g.documents.length > 0)
-          );
+          setState({
+            groups: reorderDocuments(state.groups, sourceElem, targetElem, instruction).filter(
+              (g) => g.documents.length > 0
+            ),
+            lastMovedElement: sourceElem,
+          });
           return;
         }
         // document over group (move to new group)
         if (isDocumentElement(sourceElem) && isGroupElement(targetElem)) {
-          setGroups(
-            moveDocumentToNewGroup(groups, sourceElem, targetElem.id, instruction).filter((g) => g.documents.length > 0)
-          );
+          setState({
+            groups: moveDocumentToNewGroup(state.groups, sourceElem, targetElem.id, instruction).filter(
+              (g) => g.documents.length > 0
+            ),
+            lastMovedElement: sourceElem,
+          });
           return;
         }
       },
     });
-  }, [groups]);
+  }, [state, registry]);
+
+  const ref = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
-      <div className="col-span-full grid grid-cols-subgrid text-gray-500 font-medium">
-        <div className="flex items-center gap-2 py-2 px-3"><ListOrdered size={20} /><span>Priority</span></div>
-        <div className="py-2 px-3 ml-1.5">Document</div>
-        <div className="p-2">File</div>
-        <div className="p-2">Type</div>
-        <div className="p-2">Category</div>
-        <div className="p-2">Size</div>
+    <DragRegistryContext.Provider value={registry}>
+      <div ref={ref} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
+        <div className="col-span-full grid grid-cols-subgrid text-gray-500 font-medium">
+          <div className="flex items-center gap-2 py-2 px-3">
+            <ListOrdered size={20} />
+            <span>Priority</span>
+          </div>
+          <div className="py-2 px-3 ml-1.5">Document</div>
+          <div className="p-2">File</div>
+          <div className="p-2">Type</div>
+          <div className="p-2">Category</div>
+          <div className="p-2">Size</div>
+        </div>
+        <div className="grid grid-cols-subgrid col-span-full gap-y-1.5">
+          {state.groups.map((p, idx) => (
+            <PriorityGroupCard
+              key={p.id}
+              isFirst={idx === 0}
+              isLast={idx === state.groups.length - 1}
+              group={p}
+              value={idx + 1}
+            />
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-subgrid col-span-full gap-y-1.5">
-      {groups.map((p, idx) => (
-        <PriorityGroupCard key={p.id} isFirst={idx === 0} isLast={idx === groups.length - 1} group={p} value={idx + 1} />
-      ))}
-      </div>
-    </div>
+    </DragRegistryContext.Provider>
   );
 }
 

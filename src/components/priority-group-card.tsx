@@ -22,6 +22,7 @@ import { createPortal } from "react-dom";
 import { isDocumentElement, isGroupElement, type DraggableState, type GroupElement } from "../types/draggable";
 import { DragHandle } from "./draggable/drag-handle";
 import { DragPreview } from "./draggable/drag-preview";
+import { useDragRegistryContext } from "./draggable/drag-registry-context";
 
 interface PriorityGroupProps {
   isFirst: boolean;
@@ -46,14 +47,14 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
     isOver: false,
     instruction: null,
   });
-  //const [instruction, setInstruction] = useState<Instruction | null>(null);
-  //console.log(`Rendering PriorityGroupCard ${groupIndex} - ${state.type}`);
+  const { registerElement } = useDragRegistryContext();
   useEffect(() => {
     if (!ref.current || !dragHandleRef.current || !containerRef.current) return;
     const element = ref.current;
     const dragHandle = dragHandleRef.current;
     const container = containerRef.current;
     const data: GroupElement = { type: "group", isFirst, isLast, id: group.id };
+    registerElement({ id: group.id, type: "group" }, element);
     function handleGroupDrop(dragData: GroupElement, self: DropTargetRecord, dropTargets: DropTargetRecord[]) {
       if (isGroupElement(self.data) && self.data.id === dragData.id) {
         setDroppableState({ isOver: false, instruction: null });
@@ -155,7 +156,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
         getIsSticky: () => false,
       })
     );
-  }, [group.id, isFirst, isLast, droppableState.isOver]);
+  }, [group.id, isFirst, isLast, droppableState.isOver, registerElement]);
 
   return (
     <>
@@ -164,7 +165,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
         className={twMerge(
           "relative col-span-full grid grid-cols-subgrid",
           draggableState.type === "is-dragging" && " opacity-40",
-          droppableState.isOver && "ring-2 ring-offset-4 rounded-xs ring-blue-700/70"
+          droppableState.isOver && "ring-2 ring-offset-4 rounded-xs ring-blue-700"
         )}
       >
         <div
@@ -182,7 +183,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
           className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-blue-500 text-white hover:text-white rounded shadow bg-blue-500/70"
         />
         {group.documents.length > 0 && (
-          <div ref={containerRef} className="ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full  gap-y-1.5">
+          <div ref={containerRef} className="ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full gap-y-1.5">
             {group.documents.map((doc, index) => (
               <DocumentCard
                 key={doc.id}
