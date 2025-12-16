@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import type { Group } from "../types/data";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { type DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/types";
@@ -10,7 +10,7 @@ import {
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
 import { DropIndicator } from "./draggable/drop-indicator";
-import DocumentCard from "./document-card";
+import DocumentRow from "./document-row";
 import { Hash } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import {
@@ -19,16 +19,17 @@ import {
   extractInstruction,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
 import { createPortal } from "react-dom";
-import { isDocumentElement, isGroupElement, type DraggableState, type GroupElement } from "../types/draggable";
-import { DragHandle } from "./draggable/drag-handle";
+import { isDocumentEntry, isGroupEntry, type GroupEntry } from "../types/grid-entry";
+import { DragHandleBtn } from "./draggable/drag-handle-btn";
 import { DragPreview } from "./draggable/drag-preview";
-import { useDragRegistryContext } from "./draggable/drag-registry-context";
+import type { DraggableMetadata, DraggableState } from "../types/draggable-state";
+import { useGridView } from "../contexts/grid-view-context/use-grid-view";
+import { DeleteBtn } from "./delete-btn";
 
-interface PriorityGroupProps {
-  isFirst: boolean;
-  isLast: boolean;
+interface PriorityGroupRowProps {
   group: Group;
   value: number;
+  position: DraggableMetadata;
 }
 
 type DroppableState = {
@@ -36,7 +37,7 @@ type DroppableState = {
   instruction: Instruction | null;
 };
 
-const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps) => {
+const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,20 +48,28 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
     isOver: false,
     instruction: null,
   });
-  const { registerElement } = useDragRegistryContext();
+  const entry = useMemo<GroupEntry>(
+    () => ({
+      id: group.id,
+      type: "group",
+      isFirst: position.isFirst,
+      isLast: position.isLast,
+    }),
+    [group, position]
+  );
+  const { registerHtmlElement, remove } = useGridView();
   useEffect(() => {
     if (!ref.current || !dragHandleRef.current || !containerRef.current) return;
     const element = ref.current;
     const dragHandle = dragHandleRef.current;
     const container = containerRef.current;
-    const data: GroupElement = { type: "group", isFirst, isLast, id: group.id };
-    registerElement({ id: group.id, type: "group" }, element);
-    function handleGroupDrop(dragData: GroupElement, self: DropTargetRecord, dropTargets: DropTargetRecord[]) {
-      if (isGroupElement(self.data) && self.data.id === dragData.id) {
+    registerHtmlElement({ id: entry.id, type: "group" }, element);
+    function handleGroupDrop(dragData: GroupEntry, self: DropTargetRecord, dropTargets: DropTargetRecord[]) {
+      if (isGroupEntry(self.data) && self.data.id === dragData.id) {
         setDroppableState({ isOver: false, instruction: null });
         return;
       }
-      const groupTargets = dropTargets.filter((x) => isGroupElement(x.data));
+      const groupTargets = dropTargets.filter((x) => isGroupEntry(x.data));
       if (groupTargets[0].element !== element) {
         setDroppableState({ isOver: false, instruction: null });
         return;
@@ -79,11 +88,11 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
       setDroppableState({ isOver: false, instruction });
     }
     function onChange({ source, self, location }: ElementDropTargetEventBasePayload) {
-      if (isGroupElement(source.data)) {
+      if (isGroupEntry(source.data)) {
         handleGroupDrop(source.data, self, location.current.dropTargets);
         return;
       }
-      if (isDocumentElement(source.data)) {
+      if (isDocumentEntry(source.data)) {
         handleDocumentDrop(self, location.current.dropTargets);
         return;
       }
@@ -91,7 +100,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
     return combine(
       draggable({
         element: dragHandle, // enables text selection BUT beware it gets assigned to self.element
-        getInitialData: () => data,
+        getInitialData: () => entry,
         onGenerateDragPreview({ nativeSetDragImage }) {
           setCustomNativeDragPreview({
             nativeSetDragImage,
@@ -119,8 +128,8 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
         // },
         getIsSticky: () => true,
         getData({ input, source }) {
-          if (isGroupElement(source.data) || isDocumentElement(source.data)) {
-            return attachInstruction(data, {
+          if (isGroupEntry(source.data) || isDocumentEntry(source.data)) {
+            return attachInstruction(entry, {
               element,
               input,
               operations: {
@@ -131,7 +140,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
             });
           }
           // unknown source type
-          return attachInstruction(data, {
+          return attachInstruction(entry, {
             element,
             input,
             operations: {
@@ -156,7 +165,7 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
         getIsSticky: () => false,
       })
     );
-  }, [group.id, isFirst, isLast, droppableState.isOver, registerElement]);
+  }, [entry, droppableState.isOver, registerHtmlElement]);
 
   return (
     <>
@@ -170,22 +179,30 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
       >
         <div
           className={twMerge(
-            "peer text-slate-600 font-medium text-sm px-3 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
+            "peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
           )}
         >
-          <div className="flex items-center ">
-            <Hash className="text-blue-700 p-0.5 rounded-full" size={18} />
-            <span>{value}</span>
+          <div className="flex gap-3 items-center justify-between">
+            <div className="flex items-center ">
+              <Hash className="text-blue-700 p-0.5 rounded-full" size={18} />
+              {value}
+            </div>
+
+            <DeleteBtn
+              onClick={() => {
+                remove(entry);
+              }}
+            />
           </div>
         </div>
-        <DragHandle
+        <DragHandleBtn
           ref={dragHandleRef}
           className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-blue-500 text-white hover:text-white rounded shadow bg-blue-500/70"
         />
         {group.documents.length > 0 && (
           <div ref={containerRef} className="ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full gap-y-1.5">
             {group.documents.map((doc, index) => (
-              <DocumentCard
+              <DocumentRow
                 key={doc.id}
                 groupId={group.id}
                 isFirst={index === 0}
@@ -207,4 +224,4 @@ const PriorityGroupCard = ({ isFirst, isLast, group, value }: PriorityGroupProps
   );
 };
 
-export default PriorityGroupCard;
+export default PriorityGroupRow;

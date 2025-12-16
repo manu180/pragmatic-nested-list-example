@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import type { Document } from "../types/data";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import {
@@ -6,10 +6,10 @@ import {
   dropTargetForElements,
   type ElementDropTargetEventBasePayload,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { DragHandle } from "./draggable/drag-handle";
+import { DragHandleBtn } from "./draggable/drag-handle-btn";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
-import { isDocumentElement, type DocumentElement, type DraggableState } from "../types/draggable";
+import { isDocumentEntry, type DocumentEntry } from "../types/grid-entry";
 import { twMerge } from "tailwind-merge";
 import { createPortal } from "react-dom";
 import { DragPreview } from "./draggable/drag-preview";
@@ -19,16 +19,19 @@ import {
   extractInstruction,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/list-item";
 import { DropIndicator } from "./draggable/drop-indicator";
-import { useDragRegistryContext } from "./draggable/drag-registry-context";
+import type { DraggableState } from "../types/draggable-state";
+import { useGridView } from "../contexts/grid-view-context/use-grid-view";
+import { DeleteBtn } from "./delete-btn";
+import FileRow from "./file-row";
 
-interface DocumentCardProps {
+interface DocumentRowProps {
   groupId: string;
   isFirst: boolean;
   isLast: boolean;
   document: Document;
 }
 
-const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst, isLast }) => {
+const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, isLast }) => {
   const ref = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const [state, setState] = useState<DraggableState>({
@@ -39,21 +42,24 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
     instruction &&
     !(isFirst && instruction.operation == "reorder-before") &&
     !(isLast && instruction.operation == "reorder-after");
-  const { registerElement } = useDragRegistryContext();
-  useEffect(() => {
-    if (!ref.current || !dragHandleRef.current) return;
-    const element = ref.current;
-    const dragHandle = dragHandleRef.current;
-    const data: DocumentElement = {
+  const entry = useMemo<DocumentEntry>(
+    () => ({
       type: "document",
       groupId,
       id: document.id,
       isFirst,
       isLast,
-    };
-    registerElement({ id: document.id, type: "document" }, element);
+    }),
+    [groupId, document.id, isFirst, isLast]
+  );
+  const { registerHtmlElement, remove } = useGridView();
+  useEffect(() => {
+    if (!ref.current || !dragHandleRef.current) return;
+    const element = ref.current;
+    const dragHandle = dragHandleRef.current;
+    registerHtmlElement({ id: entry.id, type: "document" }, element);
     function onChange({ source, self, location }: ElementDropTargetEventBasePayload) {
-      if (!isDocumentElement(source.data) || !isDocumentElement(self.data)) {
+      if (!isDocumentEntry(source.data) || !isDocumentEntry(self.data)) {
         return;
       }
       if (self.data.id === source.data.id) {
@@ -70,7 +76,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
     return combine(
       draggable({
         element: dragHandle, // enables text selection BUT beware it gets assigned to self.element
-        getInitialData: () => data,
+        getInitialData: () => entry,
         onGenerateDragPreview({ nativeSetDragImage }) {
           setCustomNativeDragPreview({
             nativeSetDragImage,
@@ -93,13 +99,13 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
       }),
       dropTargetForElements({
         element,
-        canDrop: ({ source }) => isDocumentElement(source.data),
+        canDrop: ({ source }) => isDocumentEntry(source.data),
         getIsSticky: () => true,
         // canDrop({ source }) {
         //   return isPriorityDragData(source.data) && source.data.id === data.id;
         // },
         getData({ input }) {
-          return attachInstruction(data, {
+          return attachInstruction(entry, {
             element,
             input,
             operations: {
@@ -119,7 +125,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         },
       })
     );
-  }, [groupId, isFirst, isLast, document.id, registerElement]);
+  }, [entry, registerHtmlElement]);
 
   return (
     <>
@@ -133,27 +139,26 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
         <div className="peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4">
           <div className="flex gap-3 items-center justify-between">
             <span className="whitespace-nowrap">{document.name}</span>
-            <span className="rounded-sm px-1.5 py-0.5 bg-slate-400/50 text-xs text-white font-medium">
-              {document.files?.length}
-            </span>
+            <div className="flex gap-1.5 items-center">
+              <span className="rounded-sm px-1.5 bg-slate-400/50 text-xs text-white font-medium">
+                {document.files?.length}
+              </span>
+              <DeleteBtn
+                onClick={() => {
+                  remove(entry);
+                }}
+              />
+            </div>
           </div>
         </div>
-        <DragHandle
+        <DragHandleBtn
           ref={dragHandleRef}
           className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-teal-500 text-white hover:text-white rounded shadow bg-teal-400/70"
         />
         {document.files.length > 0 && (
           <div className="grid grid-cols-subgrid col-start-2 col-span-full border-t-slate-200 border-t">
             {document.files.map((file) => (
-              <div
-                key={file.id}
-                className="grid grid-cols-subgrid col-span-full items-center border-slate-100 border-b py-1.5 text-sm text-gray-600"
-              >
-                <div className="px-2">{file.filename}</div>
-                <div className="px-2">{file.type}</div>
-                <div className="px-2">{file.category}</div>
-                <div className="px-2">{file.size}</div>
-              </div>
+              <FileRow key={file.id} file={file} groupId={groupId} documentId={document.id} />
             ))}
           </div>
         )}
@@ -170,4 +175,4 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, groupId, isFirst,
   );
 };
 
-export default DocumentCard;
+export default DocumentRow;
