@@ -24,7 +24,7 @@ import { DragHandleBtn } from "./draggable/drag-handle-btn";
 import { DragPreview } from "./draggable/drag-preview";
 import type { DraggableMetadata, DraggableState } from "../types/draggable-state";
 import { useGridView } from "../contexts/grid-view-context/use-grid-view";
-import { DeleteBtn } from "./delete-btn";
+import { DeleteBtnWithBadge } from "./delete-btn";
 
 interface PriorityGroupRowProps {
   group: Group;
@@ -187,12 +187,13 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
               <Hash className="text-blue-700 p-0.5 rounded-full" size={18} />
               {value}
             </div>
-
-            <DeleteBtn
+            <DeleteBtnWithBadge
               onClick={() => {
                 remove(entry);
               }}
-            />
+            >
+              {group.documents.flatMap(d => d.files).length}
+            </DeleteBtnWithBadge>
           </div>
         </div>
         <DragHandleBtn

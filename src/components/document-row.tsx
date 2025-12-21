@@ -21,7 +21,7 @@ import {
 import { DropIndicator } from "./draggable/drop-indicator";
 import type { DraggableState } from "../types/draggable-state";
 import { useGridView } from "../contexts/grid-view-context/use-grid-view";
-import { DeleteBtn } from "./delete-btn";
+import { DeleteBtnWithBadge } from "./delete-btn";
 import FileRow from "./file-row";
 
 interface DocumentRowProps {
@@ -140,14 +140,13 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
           <div className="flex gap-3 items-center justify-between">
             <span className="whitespace-nowrap">{document.name}</span>
             <div className="flex gap-1.5 items-center">
-              <span className="rounded-sm px-1.5 bg-slate-400/50 text-xs text-white font-medium">
-                {document.files?.length}
-              </span>
-              <DeleteBtn
+              <DeleteBtnWithBadge
                 onClick={() => {
                   remove(entry);
                 }}
-              />
+              >
+                {document.files?.length}
+              </DeleteBtnWithBadge>
             </div>
           </div>
         </div>

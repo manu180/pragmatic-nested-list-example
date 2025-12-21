@@ -2,6 +2,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --text-2xs: 0.5625rem;
+}
+
 * {
   box-sizing: border-box;
 }
