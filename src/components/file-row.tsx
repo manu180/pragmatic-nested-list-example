@@ -13,7 +13,7 @@ const FileRow = ({ groupId, documentId, file }: FileRowProps) => {
   return (
     <div
       key={file.id}
-      className="grid grid-cols-subgrid col-span-full items-center border-slate-100 border-b py-1.5 text-sm text-gray-600"
+      className="grid grid-cols-subgrid col-span-full items-center not-last:border-slate-100 not-last:border-b py-1.5 text-sm text-gray-600"
     >
       <div className="px-2">{file.filename}</div>
       <div className="px-2">{file.type}</div>

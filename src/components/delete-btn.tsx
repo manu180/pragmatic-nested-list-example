@@ -10,7 +10,7 @@ export function DeleteBtn({ className, ...rest }: ComponentPropsWithoutRef<"butt
       type="button"
       {...rest}
     >
-      <Trash2 size={16} />
+      <Trash2 size={15} />
     </button>
   );
 }
@@ -18,12 +18,12 @@ export function DeleteBtn({ className, ...rest }: ComponentPropsWithoutRef<"butt
 export function DeleteBtnWithBadge({ className, children, ...rest }: ComponentPropsWithoutRef<"button">) {
   return (
     <button
-      className={twMerge("relative cursor-pointer text-slate-500 bg-transparent transition-colors", className)}
+      className={twMerge("relative cursor-pointer text-slate-500 bg-transparent transition-colors mr-1.5", className)}
       type="button"
       {...rest}
     >
-      <Badge className="absolute bg-red-400 rounded-full text-2xs px-1 -right-1.5 -top-1.5">{children}</Badge>
-      <Trash2 size={16} />
+      <Badge className="absolute bg-red-400 rounded-full text-2xs px-1 -right-2 -top-1.5">{children}</Badge>
+      <Trash2 size={15} />
     </button>
   );
 }

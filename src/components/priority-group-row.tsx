@@ -11,7 +11,6 @@ import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/el
 import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
 import { DropIndicator } from "./draggable/drop-indicator";
 import DocumentRow from "./document-row";
-import { Hash } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import {
   type Instruction,
@@ -39,7 +38,7 @@ type DroppableState = {
 
 const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const dragHandleRef = useRef<HTMLButtonElement>(null);
+  const draggableRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [draggableState, setDraggableState] = useState<DraggableState>({
     type: "idle",
@@ -59,9 +58,9 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
   );
   const { registerHtmlElement, remove } = useGridView();
   useEffect(() => {
-    if (!ref.current || !dragHandleRef.current || !containerRef.current) return;
+    if (!ref.current || !draggableRef.current || !containerRef.current) return;
     const element = ref.current;
-    const dragHandle = dragHandleRef.current;
+    const draggableElem = draggableRef.current;
     const container = containerRef.current;
     registerHtmlElement({ id: entry.id, type: "group" }, element);
     function handleGroupDrop(dragData: GroupEntry, self: DropTargetRecord, dropTargets: DropTargetRecord[]) {
@@ -99,7 +98,7 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
     }
     return combine(
       draggable({
-        element: dragHandle, // enables text selection BUT beware it gets assigned to self.element
+        element: draggableElem, // text selection is disabled within the entire element - use a drag handle if needed
         getInitialData: () => entry,
         onGenerateDragPreview({ nativeSetDragImage }) {
           setCustomNativeDragPreview({
@@ -173,18 +172,30 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
         ref={ref}
         className={twMerge(
           "relative col-span-full grid grid-cols-subgrid",
+          //"has-[div[draggable]:hover]:[&_div[draggable]]:bg-slate-200",
           draggableState.type === "is-dragging" && " opacity-40",
           droppableState.isOver && "ring-2 ring-offset-4 rounded-xs ring-blue-700"
         )}
       >
         <div
+          ref={draggableRef}
+          // add attribute data-drag-handle to button and here hover:[&_button[data-drag-handle]]:text-blue-500
+          // OR
+          // set group/priority here and use it on button with group-hover/priority:text-blue-500
           className={twMerge(
-            "peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-blue-500/50 border-l-4"
+            // Layout and cursor states
+            "peer/priority group/priority cursor-grab active:cursor-grabbing",
+            // Typography and spacing
+            "text-slate-600 font-medium text-sm p-1.5",
+            // Background
+            "bg-slate-100 hover:bg-slate-200",
+            // Border
+            "border-t-slate-200 border-t border-l-4 border-l-blue-500/50 hover:border-l-blue-500"
           )}
         >
           <div className="flex gap-3 items-center justify-between">
-            <div className="flex items-center ">
-              <Hash className="text-blue-700 p-0.5 rounded-full" size={18} />
+            <div className="flex items-center gap-1">
+              <DragHandleBtn className="text-blue-500/50 group-hover/priority:text-blue-500" />
               {value}
             </div>
             <DeleteBtnWithBadge
@@ -192,16 +203,19 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
                 remove(entry);
               }}
             >
-              {group.documents.flatMap(d => d.files).length}
+              {group.documents.flatMap((d) => d.files).length}
             </DeleteBtnWithBadge>
           </div>
         </div>
-        <DragHandleBtn
-          ref={dragHandleRef}
-          className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-blue-500 text-white hover:text-white rounded shadow bg-blue-500/70"
-        />
         {group.documents.length > 0 && (
-          <div ref={containerRef} className="ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full gap-y-1.5">
+          <div
+            ref={containerRef}
+            className={twMerge(
+              "ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full gap-y-1.5",
+              // When peer-priority is hovered, apply hover styles to all direct children divs of element with data-draggable-document attribute
+              "peer-hover/priority:[&_div:has([data-draggable-document])>div]:bg-slate-200 peer-hover/priority:[&_div:has([data-draggable-document])>div]:border-b-slate-200"
+            )}
+          >
             {group.documents.map((doc, index) => (
               <DocumentRow
                 key={doc.id}

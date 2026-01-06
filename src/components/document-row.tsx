@@ -33,7 +33,7 @@ interface DocumentRowProps {
 
 const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, isLast }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const dragHandleRef = useRef<HTMLButtonElement>(null);
+  const draggableRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<DraggableState>({
     type: "idle",
   });
@@ -54,9 +54,9 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
   );
   const { registerHtmlElement, remove } = useGridView();
   useEffect(() => {
-    if (!ref.current || !dragHandleRef.current) return;
+    if (!ref.current || !draggableRef.current) return;
     const element = ref.current;
-    const dragHandle = dragHandleRef.current;
+    const draggableElem = draggableRef.current;
     registerHtmlElement({ id: entry.id, type: "document" }, element);
     function onChange({ source, self, location }: ElementDropTargetEventBasePayload) {
       if (!isDocumentEntry(source.data) || !isDocumentEntry(self.data)) {
@@ -75,7 +75,7 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
     }
     return combine(
       draggable({
-        element: dragHandle, // enables text selection BUT beware it gets assigned to self.element
+        element: draggableElem, // text selection is disabled within the entire element - use a drag handle if needed
         getInitialData: () => entry,
         onGenerateDragPreview({ nativeSetDragImage }) {
           setCustomNativeDragPreview({
@@ -136,26 +136,49 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
           state.type === "is-dragging" && "opacity-40"
         )}
       >
-        <div className="peer text-slate-600 font-medium text-sm pl-3 pr-2 py-1.5 bg-slate-100 border-t-slate-200 border-t border-l-teal-500/40 border-l-4">
+        <div
+          ref={draggableRef}
+          data-draggable-document
+          // add attribute data-drag-handle to button and here hover:[&_button[data-drag-handle]]:text-teal-500
+          // OR
+          // set group/document here and use it on button with group-hover/document:text-teal-500
+          className={twMerge(
+            // Layout and cursor states
+            "peer/document group/document cursor-grab active:cursor-grabbing",
+            // Typography and spacing
+            "text-slate-600 font-medium text-sm p-1.5",
+            // Background
+            "bg-slate-100 hover:bg-slate-200",
+            // Border
+            "border-t border-t-slate-200 border-l-4 border-l-teal-500/40 hover:border-l-teal-500"
+          )}
+        >
           <div className="flex gap-3 items-center justify-between">
-            <span className="whitespace-nowrap">{document.name}</span>
-            <div className="flex gap-1.5 items-center">
-              <DeleteBtnWithBadge
-                onClick={() => {
-                  remove(entry);
-                }}
-              >
-                {document.files?.length}
-              </DeleteBtnWithBadge>
+            <div className="flex items-center gap-1">
+              <DragHandleBtn className="text-teal-500/40 group-hover/document:text-teal-500" />
+              <span className="whitespace-nowrap">{document.name}</span>
             </div>
+            <DeleteBtnWithBadge
+              onClick={() => {
+                remove(entry);
+              }}
+            >
+              {document.files?.length}
+            </DeleteBtnWithBadge>
           </div>
         </div>
-        <DragHandleBtn
-          ref={dragHandleRef}
-          className="absolute -left-2 top-1.5 py-1 px-0.5 invisible peer-hover:visible hover:visible hover:bg-teal-500 text-white hover:text-white rounded shadow bg-teal-400/70"
-        />
         {document.files.length > 0 && (
-          <div className="grid grid-cols-subgrid col-start-2 col-span-full border-t-slate-200 border-t">
+          <div
+            className={twMerge(
+              "grid grid-cols-subgrid col-start-2 col-span-full",
+              // Background
+              "bg-white",
+              // Border
+              "border-t border-t-slate-200 border-b border-b-slate-100",
+              // When peer-priority is hovered, apply hover styles
+              "peer-hover/document:[&>div]:bg-slate-200 peer-hover/document:border-b-slate-200"
+            )}
+          >
             {document.files.map((file) => (
               <FileRow key={file.id} file={file} groupId={groupId} documentId={document.id} />
             ))}

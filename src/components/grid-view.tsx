@@ -49,7 +49,7 @@ export default function GridView({ groups, onChangeGroups, onRemoveEntry }: Grid
           onChangeGroups(
             reorderGroups(groups, sourceElem.id, targetElem.id, instruction).filter((g) => g.documents.length > 0)
           );
-          triggerPostMoveFlash(sourceElem, "div.peer");
+          triggerPostMoveFlash(sourceElem, "div");
           return;
         }
         // document over document (reorder)
@@ -59,7 +59,7 @@ export default function GridView({ groups, onChangeGroups, onRemoveEntry }: Grid
               reorderDocuments(groups, sourceElem, targetElem, instruction).filter((g) => g.documents.length > 0)
             );
           });
-          triggerPostMoveFlash(sourceElem, "div.peer");
+          triggerPostMoveFlash(sourceElem, "div");
           return;
         }
         // document over group (move to new group)
@@ -72,7 +72,7 @@ export default function GridView({ groups, onChangeGroups, onRemoveEntry }: Grid
               )
             );
           });
-          triggerPostMoveFlash(sourceElem, "div.peer");
+          triggerPostMoveFlash(sourceElem, "div");
           return;
         }
       },
