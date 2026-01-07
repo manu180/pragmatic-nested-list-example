@@ -186,7 +186,7 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
             // Layout and cursor states
             "peer/priority group/priority cursor-grab active:cursor-grabbing",
             // Typography and spacing
-            "text-slate-600 font-medium text-sm p-1.5",
+            "text-slate-800 font-medium text-sm p-1.5",
             // Background
             "bg-slate-100 hover:bg-slate-200",
             // Border

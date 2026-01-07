@@ -9,7 +9,7 @@ import {
   type GroupEntry,
 } from "../types/grid-entry";
 import { reorderWithInstruction, type ReorderInstruction } from "../util/draggable-util";
-import { ListOrdered } from "lucide-react";
+import { ClipboardCheck, ListOrdered } from "lucide-react";
 import PriorityGroupRow from "./priority-group-row";
 import type { Group } from "../types/data";
 import { createGroup } from "../data/data";
@@ -83,13 +83,16 @@ export default function GridView({ groups, onChangeGroups, onRemoveEntry }: Grid
 
   return (
     <GridViewContext.Provider value={{ registerHtmlElement, remove: onRemoveEntry }}>
-      <div ref={ref} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
-        <div className="col-span-full grid grid-cols-subgrid text-gray-500 font-medium">
+      <div ref={ref} className="grid grid-cols-[minmax(auto,1fr)_2fr_2fr_2fr_2fr_2fr]">
+        <div className="col-span-full grid grid-cols-subgrid text-slate-500 font-medium">
           <div className="flex items-center gap-2 py-2 px-3">
             <ListOrdered size={20} />
             <span>Priority</span>
           </div>
-          <div className="py-2 px-3 ml-1.5">Document</div>
+          <div className="flex items-center gap-2 py-2 px-3">
+            <ClipboardCheck size={20} />
+            <span>Task</span>
+          </div>
           <div className="p-2">File</div>
           <div className="p-2">Type</div>
           <div className="p-2">Category</div>

@@ -146,7 +146,7 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
             // Layout and cursor states
             "peer/document group/document cursor-grab active:cursor-grabbing",
             // Typography and spacing
-            "text-slate-600 font-medium text-sm p-1.5",
+            "text-slate-800 font-medium text-sm p-1.5",
             // Background
             "bg-slate-100 hover:bg-slate-200",
             // Border

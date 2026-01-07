@@ -7,7 +7,7 @@ export function DragHandleBtn({ ref, className, ...rest }: ComponentPropsWithRef
     <button
       ref={ref}
       className={twMerge(
-        "drag-handle cursor-grab active:cursor-grabbing text-slate-500 bg-transparent transition-colors",
+        "drag-handle cursor-grab active:cursor-grabbing bg-transparent transition-colors",
         className
       )}
       type="button"
