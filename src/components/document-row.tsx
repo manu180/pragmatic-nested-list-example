@@ -148,9 +148,9 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
             // Typography and spacing
             "text-slate-800 font-medium text-sm p-1.5",
             // Background
-            "bg-slate-100 hover:bg-slate-200",
+            "bg-slate-50 hover:bg-slate-100",
             // Border
-            "border-t border-t-slate-200 border-l-4 border-l-teal-500/40 hover:border-l-teal-500"
+            "border-t border-t-slate-100 border-l-4 border-l-teal-500/40 hover:border-l-teal-500"
           )}
         >
           <div className="flex gap-3 items-center justify-between">
@@ -174,9 +174,9 @@ const DocumentRow: React.FC<DocumentRowProps> = ({ document, groupId, isFirst, i
               // Background
               "bg-white",
               // Border
-              "border-t border-t-slate-200 border-b border-b-slate-100",
+              "border-t border-t-slate-100 border-b border-b-slate-50",
               // When peer-priority is hovered, apply hover styles
-              "peer-hover/document:[&>div]:bg-slate-200 peer-hover/document:border-b-slate-200"
+              "peer-hover/document:[&>div]:bg-slate-100 peer-hover/document:border-b-slate-100"
             )}
           >
             {document.files.map((file) => (

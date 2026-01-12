@@ -188,9 +188,9 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
             // Typography and spacing
             "text-slate-800 font-medium text-sm p-1.5",
             // Background
-            "bg-slate-100 hover:bg-slate-200",
+            "bg-slate-50 hover:bg-slate-100",
             // Border
-            "border-t-slate-200 border-t border-l-4 border-l-blue-500/50 hover:border-l-blue-500"
+            "border-t-slate-100 border-t border-l-4 border-l-blue-500/50 hover:border-l-blue-500"
           )}
         >
           <div className="flex gap-3 items-center justify-between">
@@ -213,7 +213,7 @@ const PriorityGroupRow = ({ group, value, position }: PriorityGroupRowProps) => 
             className={twMerge(
               "ml-1.5 grid grid-cols-subgrid col-start-2 col-span-full gap-y-1.5",
               // When peer-priority is hovered, apply hover styles to all direct children divs of element with data-draggable-document attribute
-              "peer-hover/priority:[&_div:has([data-draggable-document])>div]:bg-slate-200 peer-hover/priority:[&_div:has([data-draggable-document])>div]:border-b-slate-200"
+              "peer-hover/priority:[&_div:has([data-draggable-document])>div]:bg-slate-100 peer-hover/priority:[&_div:has([data-draggable-document])>div]:border-b-slate-100"
             )}
           >
             {group.documents.map((doc, index) => (
